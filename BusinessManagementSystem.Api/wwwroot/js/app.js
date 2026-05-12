@@ -81,9 +81,9 @@ async function loadDashboard() {
     document.getElementById("productsInStock").textContent = data.productsInStock;
     document.getElementById("lowStockCount").textContent = data.lowStockCount;
     document.getElementById("topProducts").innerHTML = (data.topProducts.length ? data.topProducts : [{ productName: "No sales yet", quantitySold: 0, revenue: 0 }])
-        .map(item => `<div class="list-row"><span>${item.productName}</span><strong>${item.quantitySold} sold</strong></div>`).join("");
+        .map((item, index) => `<div class="list-row" style="animation: fadeUp .3s ease ${index * 60}ms both"><span>${item.productName}</span><strong>${item.quantitySold} sold</strong></div>`).join("");
     document.getElementById("stockAlerts").innerHTML = (data.stockAlerts.length ? data.stockAlerts : [{ name: "No low stock items", stockQuantity: 0, lowStockThreshold: 0 }])
-        .map(item => `<div class="list-row warning"><span>${item.name}</span><strong>${item.stockQuantity} / ${item.lowStockThreshold}</strong></div>`).join("");
+        .map((item, index) => `<div class="list-row warning" style="animation: fadeUp .3s ease ${index * 60}ms both"><span>${item.name}</span><strong>${item.stockQuantity} / ${item.lowStockThreshold}</strong></div>`).join("");
 }
 
 async function initInventory() {
