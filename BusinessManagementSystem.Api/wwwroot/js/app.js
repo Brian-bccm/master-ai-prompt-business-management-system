@@ -166,11 +166,23 @@ async function checkout() {
         method: "POST",
         body: JSON.stringify({ paymentMethod: "Cash", items: cart.map(i => ({ productId: i.productId, quantity: i.quantity })) })
     });
-    window.open(`/api/sales/${sale.id}/invoice`, "_blank");
+    await openInvoice(sale.id);
     cart = [];
     renderCart();
     posProducts = await api("/products");
     renderProductTiles(posProducts);
+}
+
+async function openInvoice(saleId) {
+    const invoiceHtml = await api(`/sales/${saleId}/invoice`);
+    const invoiceWindow = window.open("", "_blank");
+    if (!invoiceWindow) {
+        throw new Error("Allow popups to open the invoice.");
+    }
+
+    invoiceWindow.document.open();
+    invoiceWindow.document.write(invoiceHtml);
+    invoiceWindow.document.close();
 }
 
 async function initReports() {
