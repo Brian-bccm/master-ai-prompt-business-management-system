@@ -7,10 +7,25 @@
     <link rel="stylesheet" href="/css/main.css">
 </head>
 <body class="auth-page" data-page="login">
+    <div class="auth-backdrop" aria-hidden="true">
+        <span class="grid-layer"></span>
+        <span class="beam beam-one"></span>
+        <span class="beam beam-two"></span>
+    </div>
     <main class="login-shell">
+        <section class="auth-showcase">
+            <div class="brand-lockup"><span class="brand-mark"></span><strong>BMS Command</strong></div>
+            <h1>Run sales, stock, and reporting from one sharp workspace.</h1>
+            <p>Built for small businesses that need fast checkout, clean inventory control, supplier tracking, and daily insight without spreadsheet chaos.</p>
+            <div class="auth-kpis">
+                <span><strong>POS</strong> Live checkout</span>
+                <span><strong>Stock</strong> Auto alerts</span>
+                <span><strong>Admin</strong> Role access</span>
+            </div>
+        </section>
         <section class="login-panel">
             <p class="eyebrow">Business Management System</p>
-            <h1>Sign in to your store workspace</h1>
+            <h2>Sign in to your store workspace</h2>
             <form id="loginForm" class="stack">
                 <label>Email<input id="email" type="email" value="admin@bms.local" required></label>
                 <label>

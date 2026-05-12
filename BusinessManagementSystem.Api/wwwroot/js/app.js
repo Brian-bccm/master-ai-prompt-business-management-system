@@ -32,6 +32,10 @@ function buildShell() {
 
     sidebar.innerHTML = `
         <div class="brand">BMS</div>
+        <div class="sidebar-card">
+            <span>Workspace</span>
+            <strong>Retail Command</strong>
+        </div>
         <nav class="nav">
             ${navItems.map(([label, href]) => `<a class="${location.pathname === href ? "active" : ""}" href="${href}">${label}</a>`).join("")}
         </nav>
