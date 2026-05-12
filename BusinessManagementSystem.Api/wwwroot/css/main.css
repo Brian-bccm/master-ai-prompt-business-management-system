@@ -150,7 +150,7 @@ button.secondary {
     position: absolute;
     left: 42px;
     right: 42px;
-    bottom: 40px;
+    bottom: 22px;
     height: 150px;
     border-radius: 14px;
     background:
@@ -197,14 +197,12 @@ button.secondary {
     line-height: 1.6;
 }
 .auth-kpis {
-    position: absolute;
+    position: relative;
     z-index: 2;
-    left: 42px;
-    right: 42px;
-    bottom: 38px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
+    margin-top: 42px;
 }
 .auth-kpis span {
     padding: 14px;
