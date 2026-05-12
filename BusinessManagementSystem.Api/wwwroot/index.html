@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BMS Login</title>
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body class="auth-page" data-page="login">
+    <main class="login-shell">
+        <section class="login-panel">
+            <p class="eyebrow">Business Management System</p>
+            <h1>Sign in to your store workspace</h1>
+            <form id="loginForm" class="stack">
+                <label>Email<input id="email" type="email" value="admin@bms.local" required></label>
+                <label>
+                    Password
+                    <span class="password-field">
+                        <input id="password" type="password" value="Admin123!" required>
+                        <button id="togglePassword" type="button" class="icon-button" aria-label="Show password">
+                            <svg class="icon-eye" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg class="icon-eye-off" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M3 3l18 18"></path>
+                                <path d="M10.6 10.6A3 3 0 0 0 13.4 13.4"></path>
+                                <path d="M9.9 5.2A9.4 9.4 0 0 1 12 5c6 0 9.5 7 9.5 7a15.4 15.4 0 0 1-3.1 3.9"></path>
+                                <path d="M6.2 6.7A15.7 15.7 0 0 0 2.5 12S6 19 12 19a9.3 9.3 0 0 0 4.1-.9"></path>
+                            </svg>
+                        </button>
+                    </span>
+                </label>
+                <button type="submit">Login</button>
+            </form>
+            <p class="muted">Demo: admin@bms.local / Admin123!</p>
+            <div id="message" class="message"></div>
+        </section>
+    </main>
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

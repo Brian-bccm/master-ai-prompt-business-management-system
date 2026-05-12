@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BMS POS</title>
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body data-page="pos">
+    <div class="app-shell">
+        <aside class="sidebar"></aside>
+        <main class="content">
+            <header class="page-header"><div><p class="eyebrow">Sales</p><h1>Point of Sale</h1></div><button id="logoutBtn" class="secondary">Logout</button></header>
+            <section class="pos-grid">
+                <div class="panel"><input id="posSearch" placeholder="Search item"><div id="productTiles" class="product-tiles"></div></div>
+                <div class="panel"><h2>Cart</h2><div id="cartItems" class="list"></div><div class="cart-total">Total <strong id="cartTotal">RM 0.00</strong></div><button id="checkoutBtn">Checkout</button></div>
+            </section>
+        </main>
+    </div>
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

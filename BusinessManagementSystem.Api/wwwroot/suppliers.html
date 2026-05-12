@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BMS Suppliers</title>
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body data-page="suppliers">
+    <div class="app-shell">
+        <aside class="sidebar"></aside>
+        <main class="content">
+            <header class="page-header"><div><p class="eyebrow">Procurement</p><h1>Suppliers</h1></div><button id="logoutBtn" class="secondary">Logout</button></header>
+            <section class="editor-grid">
+                <form id="supplierForm" class="panel stack">
+                    <h2>Add Supplier</h2>
+                    <input id="supplierName" placeholder="Supplier name" required>
+                    <input id="contactPerson" placeholder="Contact person">
+                    <input id="phone" placeholder="Phone">
+                    <input id="supplierEmail" placeholder="Email">
+                    <input id="address" placeholder="Address">
+                    <button type="submit">Save Supplier</button>
+                </form>
+                <div class="panel table-wrap"><table><thead><tr><th>Name</th><th>Contact</th><th>Phone</th><th>Email</th></tr></thead><tbody id="suppliersTable"></tbody></table></div>
+            </section>
+        </main>
+    </div>
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

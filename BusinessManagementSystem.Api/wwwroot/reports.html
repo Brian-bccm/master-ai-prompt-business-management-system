@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BMS Reports</title>
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body data-page="reports">
+    <div class="app-shell">
+        <aside class="sidebar"></aside>
+        <main class="content">
+            <header class="page-header"><div><p class="eyebrow">Reporting</p><h1>Reports</h1></div><button id="logoutBtn" class="secondary">Logout</button></header>
+            <section class="metric-grid">
+                <a class="report-link" href="/api/reports/sales/export-excel">Sales CSV</a>
+                <a class="report-link" href="/api/reports/inventory/export-excel">Inventory CSV</a>
+                <a class="report-link" href="/api/reports/sales/export-pdf">Sales PDF</a>
+                <a class="report-link" href="/api/reports/inventory/export-pdf">Inventory PDF</a>
+            </section>
+            <section class="panel table-wrap"><h2>Sales History</h2><table><thead><tr><th>Invoice</th><th>Date</th><th>Payment</th><th>Total</th></tr></thead><tbody id="salesTable"></tbody></table></section>
+        </main>
+    </div>
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
