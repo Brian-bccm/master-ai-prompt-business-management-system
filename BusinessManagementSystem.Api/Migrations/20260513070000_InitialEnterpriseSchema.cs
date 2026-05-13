@@ -1,10 +1,14 @@
 using System;
+using BusinessManagementSystem.Api.Data;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace BusinessManagementSystem.Api.Migrations;
 
+[DbContext(typeof(AppDbContext))]
+[Migration("20260513070000_InitialEnterpriseSchema")]
 public partial class InitialEnterpriseSchema : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)

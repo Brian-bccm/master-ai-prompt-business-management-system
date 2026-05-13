@@ -7,8 +7,17 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection") ??
+    builder.Configuration["AZURE_SQL_CONNECTION_STRING"];
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException("SQL Server connection string is missing. Configure ConnectionStrings:DefaultConnection or AZURE_SQL_CONNECTION_STRING.");
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddSingleton<TokenService>();
 builder.Services.AddScoped<PermissionService>();

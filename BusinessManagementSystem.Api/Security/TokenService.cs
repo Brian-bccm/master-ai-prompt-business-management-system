@@ -8,10 +8,26 @@ namespace BusinessManagementSystem.Api.Security;
 public sealed class TokenService
 {
     private readonly byte[] _secret;
+    private const string DevelopmentFallbackKey = "development-only-change-this-key-before-production";
 
-    public TokenService(IConfiguration configuration)
+    public TokenService(IConfiguration configuration, IHostEnvironment environment)
     {
-        var secret = configuration["Auth:SigningKey"] ?? "development-only-change-this-key-before-production";
+        var secret = configuration["Auth:SigningKey"] ?? configuration["AUTH_SIGNING_KEY"];
+        if (string.IsNullOrWhiteSpace(secret))
+        {
+            if (environment.IsProduction())
+            {
+                throw new InvalidOperationException("Production Auth signing key is missing. Configure Auth:SigningKey or AUTH_SIGNING_KEY in Azure App Service.");
+            }
+
+            secret = DevelopmentFallbackKey;
+        }
+
+        if (environment.IsProduction() && secret == DevelopmentFallbackKey)
+        {
+            throw new InvalidOperationException("Production Auth signing key must not use the development fallback value.");
+        }
+
         _secret = Encoding.UTF8.GetBytes(secret);
     }
 

@@ -8,3 +8,4 @@ obj/
 TestResults/
 appsettings.Production.json
 verify-build/
+publish-check/

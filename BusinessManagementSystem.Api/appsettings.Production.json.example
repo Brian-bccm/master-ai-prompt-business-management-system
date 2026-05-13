@@ -5,11 +5,7 @@
       "Microsoft.AspNetCore": "Warning"
     }
   },
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=YOUR_SQL_SERVER;Database=BusinessManagementSystemDb;User Id=YOUR_DB_USER;Password=YOUR_STRONG_PASSWORD;TrustServerCertificate=True;"
-  },
-  "Auth": {
-    "SigningKey": "REPLACE_WITH_A_LONG_RANDOM_PRODUCTION_SECRET"
-  },
+  "ConnectionStrings": {},
+  "Auth": {},
   "AllowedHosts": "your-domain.com"
 }

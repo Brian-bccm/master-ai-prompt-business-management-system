@@ -106,28 +106,63 @@ Core backend pieces:
 /api/reports
 ```
 
-## Real Business Deployment: IIS + SQL Server
+## Real Business Deployment: Azure App Service + Azure SQL
 
-Server prerequisites:
+Primary production target:
 
-- Windows Server
-- IIS enabled
-- ASP.NET Core Hosting Bundle for .NET 9
-- SQL Server or remote SQL Server database
+- Azure App Service
+- Azure SQL Database
+- GitHub Actions deployment from `main`
 
 Deployment steps:
 
-1. Create the production SQL Server database.
-2. Copy `appsettings.Production.json.example` to `appsettings.Production.json`.
-3. Set the production connection string and a long random `Auth:SigningKey`.
-4. In Visual Studio, right-click `BusinessManagementSystem.Api` and choose `Publish`.
-5. Use the `IIS-Folder` publish profile or create an IIS/Web Deploy profile.
-6. Copy/publish the output to the IIS site folder.
-7. Configure the IIS application pool:
-   - No Managed Code
-   - 64-bit enabled
-8. Set `ASPNETCORE_ENVIRONMENT=Production`.
-9. Run:
+1. Create Azure SQL Server and Azure SQL Database.
+2. Create Azure App Service with .NET 9 runtime.
+3. Configure App Service environment variables:
+   - `ASPNETCORE_ENVIRONMENT=Production`
+   - `AUTH_SIGNING_KEY=<long-random-secret>`
+4. Configure App Service connection string:
+   - Name: `DefaultConnection`
+   - Type: `SQLAzure`
+   - Value: Azure SQL connection string
+5. Add GitHub Actions secrets:
+   - `AZURE_WEBAPP_NAME`
+   - `AZURE_WEBAPP_PUBLISH_PROFILE`
+   - `AZURE_SQL_CONNECTION_STRING`
+   - `AUTH_SIGNING_KEY`
+6. Push to `main`.
+
+The deployment workflow uses `AZURE_WEBAPP_NAME` and `AZURE_WEBAPP_PUBLISH_PROFILE`.
+Set `AZURE_SQL_CONNECTION_STRING` and `AUTH_SIGNING_KEY` in Azure App Service runtime configuration; keeping the same values in GitHub secrets is useful for future migration jobs.
+
+The GitHub Actions workflow deploys the app to:
+
+```text
+https://<your-app-name>.azurewebsites.net
+```
+
+Database migrations:
+
+- The app applies EF Core migrations on startup with `db.Database.Migrate()`.
+- For stricter production later, move migrations into a separate release job.
+
+Full Azure checklist:
+
+```text
+docs/azure-deployment-checklist.md
+```
+
+## Alternative Deployment: Windows IIS + SQL Server
+
+For non-Azure Windows Server hosting:
+
+1. Install the ASP.NET Core Hosting Bundle.
+2. Create a SQL Server database.
+3. Configure IIS App Pool as `No Managed Code`.
+4. Publish with the `IIS-Folder` profile.
+5. Set `ASPNETCORE_ENVIRONMENT=Production`.
+6. Configure the production connection string and `AUTH_SIGNING_KEY`.
+7. Run migrations if automatic startup migration is disabled:
 
 ```powershell
 dotnet ef database update
