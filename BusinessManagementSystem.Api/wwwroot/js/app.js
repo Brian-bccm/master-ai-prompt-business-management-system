@@ -1,10 +1,13 @@
 const page = document.body.dataset.page;
 const navItems = [
-    ["Dashboard", "/dashboard.html"],
-    ["Inventory", "/inventory.html"],
-    ["POS", "/pos.html"],
-    ["Reports", "/reports.html"],
-    ["Suppliers", "/suppliers.html"]
+    { label: "Dashboard", href: "/dashboard.html", roles: ["Owner", "Manager", "Admin", "Staff"] },
+    { label: "Inventory", href: "/inventory.html", roles: ["Owner", "Manager", "Admin"] },
+    { label: "POS", href: "/pos.html", roles: ["Owner", "Manager", "Admin", "Staff"] },
+    { label: "Reports", href: "/reports.html", roles: ["Owner", "Manager", "Admin"] },
+    { label: "Suppliers", href: "/suppliers.html", roles: ["Owner", "Manager", "Admin"] },
+    { label: "Employees", href: "/employees.html", roles: ["Owner", "Manager"] },
+    { label: "Audit Logs", href: "/audit.html", roles: ["Owner", "Manager"] },
+    { label: "Notifications", href: "/notifications.html", roles: ["Owner", "Manager", "Admin", "Staff"] }
 ];
 let cart = [];
 let posProducts = [];
@@ -18,28 +21,56 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
+    if (page !== "login" && !canAccessPage(location.pathname)) {
+        location.href = "/dashboard.html";
+        return;
+    }
+
     if (page === "login") initLogin();
     if (page === "dashboard") loadDashboard();
     if (page === "inventory") initInventory();
     if (page === "pos") initPos();
     if (page === "reports") initReports();
     if (page === "suppliers") initSuppliers();
+    if (page === "employees") initEmployees();
+    if (page === "audit") loadAudit();
+    if (page === "notifications") loadNotificationsPage();
 });
 
 function buildShell() {
     const sidebar = document.querySelector(".sidebar");
     if (!sidebar) return;
 
+    const user = currentUser();
+    const availableNav = navItems.filter(item => canAccessRole(item.roles));
     sidebar.innerHTML = `
         <div class="brand">BMS</div>
         <div class="sidebar-card">
-            <span>Workspace</span>
-            <strong>Retail Command</strong>
+            <span>${user?.role || "Workspace"}</span>
+            <strong>${user?.fullName || "Retail Command"}</strong>
         </div>
         <nav class="nav">
-            ${navItems.map(([label, href]) => `<a class="${location.pathname === href ? "active" : ""}" href="${href}">${label}</a>`).join("")}
+            ${availableNav.map(({ label, href }) => `<a class="${location.pathname === href ? "active" : ""}" href="${href}">${label}</a>`).join("")}
         </nav>
     `;
+}
+
+function currentUser() {
+    try {
+        return JSON.parse(localStorage.getItem("bms_user") || "null");
+    } catch {
+        return null;
+    }
+}
+
+function canAccessRole(roles) {
+    const role = currentUser()?.role;
+    return !roles || roles.includes(role);
+}
+
+function canAccessPage(pathname) {
+    const route = navItems.find(item => item.href === pathname);
+    return !route || canAccessRole(route.roles);
 }
 
 function initLogin() {
@@ -72,7 +103,12 @@ function initLogin() {
     });
 }
 
-function logout() {
+async function logout() {
+    try {
+        if (token()) await api("/auth/logout", { method: "POST" });
+    } catch {
+        // Local logout should still complete even if the server session log fails.
+    }
     localStorage.removeItem("bms_token");
     localStorage.removeItem("bms_user");
     location.href = "/index.html";
@@ -80,14 +116,26 @@ function logout() {
 
 async function loadDashboard() {
     const data = await api("/dashboard/summary");
+    const canMonitorEmployees = canAccessRole(["Owner", "Manager"]);
     document.getElementById("dailySales").textContent = money(data.dailySales);
+    document.getElementById("weeklySales").textContent = money(data.weeklySales);
     document.getElementById("monthlyRevenue").textContent = money(data.monthlyRevenue);
+    document.getElementById("grossProfit").textContent = money(data.grossProfit);
     document.getElementById("productsInStock").textContent = data.productsInStock;
     document.getElementById("lowStockCount").textContent = data.lowStockCount;
+    document.getElementById("activeEmployees").textContent = data.activeEmployees;
+    document.getElementById("failedLoginAttempts").textContent = data.failedLoginAttempts;
     document.getElementById("topProducts").innerHTML = (data.topProducts.length ? data.topProducts : [{ productName: "No sales yet", quantitySold: 0, revenue: 0 }])
         .map((item, index) => `<div class="list-row" style="animation: fadeUp .3s ease ${index * 60}ms both"><span>${item.productName}</span><strong>${item.quantitySold} sold</strong></div>`).join("");
     document.getElementById("stockAlerts").innerHTML = (data.stockAlerts.length ? data.stockAlerts : [{ name: "No low stock items", stockQuantity: 0, lowStockThreshold: 0 }])
         .map((item, index) => `<div class="list-row warning" style="animation: fadeUp .3s ease ${index * 60}ms both"><span>${item.name}</span><strong>${item.stockQuantity} / ${item.lowStockThreshold}</strong></div>`).join("");
+    document.getElementById("employeeActivity").closest(".feature-panel").classList.toggle("is-hidden", !canMonitorEmployees);
+    if (canMonitorEmployees) {
+        document.getElementById("employeeActivity").innerHTML = (data.employeeActivity.length ? data.employeeActivity : [])
+            .map((item, index) => `<div class="list-row" style="animation: fadeUp .3s ease ${index * 60}ms both"><span>${item.employeeCode} ${item.fullName}<small>${item.role}</small></span><strong>${item.actionsToday} actions</strong></div>`).join("");
+    }
+    document.getElementById("dashboardNotifications").innerHTML = (data.notifications.length ? data.notifications : [])
+        .map((item, index) => `<div class="list-row ${item.severity === "Warning" || item.severity === "Critical" ? "warning" : ""}" style="animation: fadeUp .3s ease ${index * 60}ms both"><span>${item.title}<small>${item.message}</small></span><strong>${item.severity}</strong></div>`).join("");
 }
 
 async function initInventory() {
@@ -238,4 +286,72 @@ async function initSuppliers() {
 async function loadSuppliers() {
     const suppliers = await api("/suppliers");
     suppliersTable.innerHTML = suppliers.map(s => `<tr><td>${s.name}</td><td>${s.contactPerson || ""}</td><td>${s.phone || ""}</td><td>${s.email || ""}</td></tr>`).join("");
+}
+
+async function initEmployees() {
+    await Promise.all([loadEmployees(), loadLoginLogs()]);
+    employeeForm.addEventListener("submit", async event => {
+        event.preventDefault();
+        await api("/users", {
+            method: "POST",
+            body: JSON.stringify({
+                employeeCode: employeeCode.value,
+                fullName: employeeName.value,
+                email: employeeEmail.value,
+                password: employeePassword.value,
+                role: employeeRole.value
+            })
+        });
+        event.target.reset();
+        await loadEmployees();
+    });
+}
+
+async function loadEmployees() {
+    const employees = await api("/employees/activity");
+    employeesTable.innerHTML = employees.map(e => `
+        <tr>
+            <td>${e.employeeCode} ${e.fullName}<br><small>${e.email}</small></td>
+            <td><span class="status-pill">${e.role}</span></td>
+            <td>${e.lastLoginAt ? new Date(e.lastLoginAt).toLocaleString() : "Never"}</td>
+            <td>${e.auditActions}</td>
+            <td>${e.failedLogins}</td>
+        </tr>`).join("");
+}
+
+async function loadLoginLogs() {
+    const logs = await api("/login-logs");
+    loginLogsTable.innerHTML = logs.map(log => `
+        <tr>
+            <td>${log.employee || ""}</td>
+            <td>${log.emailAttempted}</td>
+            <td><span class="status-pill ${log.status === "Failed" ? "danger" : "success"}">${log.status}</span></td>
+            <td>${new Date(log.loginAt).toLocaleString()}</td>
+            <td>${log.logoutAt ? new Date(log.logoutAt).toLocaleString() : ""}</td>
+            <td>${log.reason || ""}</td>
+        </tr>`).join("");
+}
+
+async function loadAudit() {
+    const logs = await api("/audit-logs");
+    auditTable.innerHTML = logs.map(log => `
+        <tr>
+            <td>${new Date(log.createdAt).toLocaleString()}</td>
+            <td>${log.userName || "System"}</td>
+            <td><span class="status-pill">${log.actionType}</span></td>
+            <td>${log.module}</td>
+            <td>${log.entityName} #${log.entityId || ""}</td>
+            <td>${log.description}</td>
+        </tr>`).join("");
+}
+
+async function loadNotificationsPage() {
+    const notifications = await api("/notifications");
+    notificationsList.innerHTML = notifications.map(n => `
+        <article class="notification-card ${n.severity.toLowerCase()}">
+            <span>${n.type}</span>
+            <h2>${n.title}</h2>
+            <p>${n.message}</p>
+            <small>${new Date(n.createdAt).toLocaleString()}</small>
+        </article>`).join("");
 }

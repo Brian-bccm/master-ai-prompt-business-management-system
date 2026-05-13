@@ -1,22 +1,49 @@
 # Business Management System
 
-Production-style inventory, sales, admin, supplier, reporting, invoice, and audit-log system built with ASP.NET Core Web API and a vanilla HTML/CSS/JavaScript frontend.
+Enterprise-style inventory, POS, employee monitoring, reporting, audit-log, invoice, and notification system built with ASP.NET Core Web API, SQL Server, Entity Framework Core, and vanilla HTML/CSS/JavaScript.
 
-## Run
+## Development: Visual Studio
+
+Prerequisites:
+
+- Visual Studio 2022 or newer
+- .NET 9 SDK
+- SQL Server Developer Edition, SQL Server Express, or LocalDB
+
+Open the solution:
+
+```text
+BusinessManagementSystem.sln
+```
+
+Default development connection string:
+
+```json
+"ConnectionStrings": {
+  "DefaultConnection": "Server=localhost;Database=BusinessManagementSystemDb;Trusted_Connection=True;TrustServerCertificate=True;"
+}
+```
+
+Run from Visual Studio:
+
+- Select `IIS Express`, `https`, or `http`
+- Press `F5`
+- Open `https://localhost:5001` or `http://localhost:5000`
+
+Run from CLI:
 
 ```powershell
+cd BusinessManagementSystem.Api
+dotnet restore
+dotnet ef database update
 dotnet run --launch-profile https
 ```
 
-Open:
+Demo accounts seeded into SQL Server:
 
-- Frontend: `https://localhost:5001`
-- API health: `https://localhost:5001/api`
-
-Demo accounts:
-
-- Admin: `admin@bms.local` / `Admin123!`
+- Owner: `owner@bms.local` / `Owner123!`
 - Manager: `manager@bms.local` / `Manager123!`
+- Admin: `admin@bms.local` / `Admin123!`
 - Staff: `staff@bms.local` / `Staff123!`
 
 ## Architecture
@@ -28,67 +55,88 @@ wwwroot HTML/CSS/JS
 ASP.NET Core API endpoints
         |
         v
-Services with business rules
+Services with business workflows
         |
         v
-In-memory store for runnable demo
-SQL Server schema in Database/schema.sql
+Entity Framework Core DbContext
+        |
+        v
+SQL Server
 ```
 
-The project is intentionally dependency-light so it runs immediately in this workspace. The included `Database/schema.sql` is the SQL Server schema for moving the demo store to a real database with repositories and EF Core.
+Core backend pieces:
+
+- `Program.cs`: API routes, middleware, DI, startup migration/seed
+- `Data/AppDbContext.cs`: EF Core SQL Server model
+- `Data/DatabaseSeeder.cs`: roles, permissions, demo users, starter data
+- `Services/BusinessServices.cs`: auth, permissions, inventory, sales, reports, monitoring, audit, notifications
+- `Database/schema.sql`: SQL reference schema
+- `Migrations/`: EF Core database migration
 
 ## Included Modules
 
-- Authentication with password hashing and signed bearer tokens
-- Role-based access for Admin, Manager, and Staff
-- Product inventory CRUD
-- Category and supplier relationships
-- Low stock alerts
+- Multi-user authentication
+- Owner / Manager / Admin / Staff role hierarchy
+- Permission-based API checks
+- Employee monitoring and login/logout tracking
+- Failed login detection
+- Full audit logging
+- Inventory and suppliers
 - POS checkout with automatic stock reduction
-- Invoice HTML print view
-- Dashboard metrics
-- Sales history
-- CSV and simple PDF exports
-- Audit logs for create, update, delete, and sales activity
+- Professional printable invoice
+- Notifications for stock/security/sales events
+- Sales, inventory, employee activity, and profit report data
 
-## API Endpoints
+## API Groups
 
 ```text
-POST /api/auth/login
-POST /api/auth/register
-GET  /api/auth/me
-
-GET    /api/products
-GET    /api/products/{id}
-POST   /api/products
-PUT    /api/products/{id}
-DELETE /api/products/{id}
-GET    /api/products/low-stock
-GET    /api/products/search?query=value
-
-GET    /api/categories
-
-GET    /api/suppliers
-GET    /api/suppliers/{id}
-POST   /api/suppliers
-PUT    /api/suppliers/{id}
-DELETE /api/suppliers/{id}
-
-POST /api/sales
-GET  /api/sales
-GET  /api/sales/{id}
-GET  /api/sales/date-range?from=2026-05-01&to=2026-05-12
-GET  /api/sales/{id}/invoice
-
-GET /api/dashboard/summary
-GET /api/dashboard/daily-sales
-GET /api/dashboard/monthly-revenue
-GET /api/dashboard/top-products
-GET /api/dashboard/stock-alerts
-
-GET /api/audit-logs
-GET /api/reports/sales/export-excel
-GET /api/reports/sales/export-pdf
-GET /api/reports/inventory/export-excel
-GET /api/reports/inventory/export-pdf
+/api/auth
+/api/users
+/api/roles
+/api/permissions
+/api/products
+/api/categories
+/api/suppliers
+/api/sales
+/api/dashboard
+/api/audit-logs
+/api/login-logs
+/api/employees/activity
+/api/notifications
+/api/reports
 ```
+
+## Real Business Deployment: IIS + SQL Server
+
+Server prerequisites:
+
+- Windows Server
+- IIS enabled
+- ASP.NET Core Hosting Bundle for .NET 9
+- SQL Server or remote SQL Server database
+
+Deployment steps:
+
+1. Create the production SQL Server database.
+2. Copy `appsettings.Production.json.example` to `appsettings.Production.json`.
+3. Set the production connection string and a long random `Auth:SigningKey`.
+4. In Visual Studio, right-click `BusinessManagementSystem.Api` and choose `Publish`.
+5. Use the `IIS-Folder` publish profile or create an IIS/Web Deploy profile.
+6. Copy/publish the output to the IIS site folder.
+7. Configure the IIS application pool:
+   - No Managed Code
+   - 64-bit enabled
+8. Set `ASPNETCORE_ENVIRONMENT=Production`.
+9. Run:
+
+```powershell
+dotnet ef database update
+```
+
+Production notes:
+
+- Do not commit real production secrets.
+- Use HTTPS only.
+- Use a dedicated SQL login with least privilege.
+- Back up the SQL Server database regularly.
+- Replace demo accounts before real use.

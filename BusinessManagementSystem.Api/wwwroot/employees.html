@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BMS Employees</title>
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body data-page="employees">
+    <div class="app-shell">
+        <aside class="sidebar"></aside>
+        <main class="content">
+            <header class="page-header"><div><p class="eyebrow">Employee Monitoring</p><h1>Employees</h1><p class="page-lede">Monitor access, activity, and failed login patterns.</p></div><button id="logoutBtn" class="secondary">Logout</button></header>
+            <section class="editor-grid">
+                <form id="employeeForm" class="panel stack">
+                    <h2>Create Employee Account</h2>
+                    <input id="employeeCode" placeholder="Employee code e.g. STF-002" required>
+                    <input id="employeeName" placeholder="Full name" required>
+                    <input id="employeeEmail" type="email" placeholder="Email" required>
+                    <input id="employeePassword" type="password" placeholder="Temporary password" required>
+                    <select id="employeeRole">
+                        <option>Staff</option>
+                        <option>Admin</option>
+                        <option>Manager</option>
+                        <option>Owner</option>
+                    </select>
+                    <button type="submit">Create Account</button>
+                </form>
+                <div class="panel table-wrap"><h2>Activity Summary</h2><table><thead><tr><th>Employee</th><th>Role</th><th>Last Login</th><th>Actions</th><th>Failed</th></tr></thead><tbody id="employeesTable"></tbody></table></div>
+            </section>
+            <section class="panel table-wrap"><h2>Login / Logout Tracking</h2><table><thead><tr><th>Employee</th><th>Email</th><th>Status</th><th>Login</th><th>Logout</th><th>Reason</th></tr></thead><tbody id="loginLogsTable"></tbody></table></section>
+        </main>
+    </div>
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
